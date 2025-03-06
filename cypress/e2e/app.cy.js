@@ -1,9 +1,11 @@
+import assert from "assert";
+
 class RegisterForm {
   elements = {
     titleInput: () => cy.get("#title"),
-    titleFeedbeck: () => cy.get("#titleFeedbeck"),
+    titleFeedback: () => cy.get("#titleFeedback"),
     imageUrlInput: () => cy.get("#imageUrl"),
-    urlFeedbeck: () => cy.get("#urlFeedbeck"),
+    urlFeedback: () => cy.get("#urlFeedback"),
     submitBtn: () => cy.get("#btnSubmit"),
   };
 
@@ -22,9 +24,17 @@ class RegisterForm {
 }
 
 const registerForm = new RegisterForm();
+const colors = {
+  errors: "rgb(220, 53, 69)",
+  success: "",
+};
 
 describe("Image Registration", () => {
   describe("Submitting an image with invalid inputs", () => {
+    after(() => {
+      cy.clearLocalStorage();
+    });
+
     const input = {
       title: "",
       url: "",
@@ -45,12 +55,27 @@ describe("Image Registration", () => {
     it(`Then I click the submit button`, () => {
       registerForm.clickSubmit();
     });
-    it(
-      `Then I should see "Please type a title for the image" message above the title field`
-    );
-    it(
-      `And I should see "Please type a valid URL" message above the imageUrl field`
-    );
-    it(`And I should see an exclamation icon in the title and URL fields`);
+    it(`Then I should see "Please type a title for the image" message above the title field`, () => {
+      // registerForm.elements.titleFeedbeck().should((element) => {
+      //   debugger;
+      // });
+      registerForm.elements
+        .titleFeedback()
+        .should("contain.text", "Please type a title for the image");
+    });
+
+    it(`And I should see "Please type a valid URL" message above the imageUrl field`, () => {
+      registerForm.elements
+        .urlFeedback()
+        .should("contain.text", "Please type a valid URL");
+    });
+
+    it(`And I should see an exclamation icon in the title and URL fields`, () => {
+      registerForm.elements.titleInput().should(([element]) => {
+        const styles = window.getComputedStyle(element);
+        const border = styles.getPropertyValue("border-right-color");
+        assert.strictEqual(border, colors.errors);
+      });
+    });
   });
 });
